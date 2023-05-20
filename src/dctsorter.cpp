@@ -8,6 +8,7 @@
 #include "scopeguard.hpp"
 
 #define IF_STOPPED_RETURN if( mState != DCTSorter::Running ) { LOG( "Stopped" ); return; }
+#define SKIP_RATE 4
 
 DCTSorter::DCTSorter() {
     reset( true );
@@ -132,8 +133,8 @@ void DCTSorter::readGreyToBlocks() {
 
     const size_t width = mGrey.width();
     const size_t height = mGrey.height();
-    const size_t hB = height - Block::size;
-    const size_t wB = width  - Block::size;
+    const size_t hB = (height - Block::size)/SKIP_RATE;
+    const size_t wB = (width  - Block::size)/SKIP_RATE;
     mBlocks = std::vector<Block>( hB * wB, Block( 0.f, mParams.quality(), false ) );
 
     // send small progress steps from 10-70 %
@@ -156,11 +157,11 @@ void DCTSorter::readGreyToBlocks() {
             int current = y * wB + x;
             ok &= mThreadPool.add( [this, current, x, y, &step] {
                 Block block;
-                block.setX( x );
-                block.setY( y );
+                block.setX( SKIP_RATE * x );
+                block.setY( SKIP_RATE * y );
                 block.setQuality( mParams.quality() );
                 block.initData(); // create data first here...
-                mGrey.getBlock( block, x, y );
+                mGrey.getBlock( block, SKIP_RATE*x, SKIP_RATE*y );
                 block.calculateStandardDeviation();
                 block.dct();
                 block.clearData(); // ...and clear it right back for less memory consumption
@@ -179,7 +180,12 @@ void DCTSorter::readGreyToBlocks() {
     if( ok ) {
         for( Block& block : mBlocks ) {
             IF_STOPPED_RETURN;
-            mGrey[block.x() + Block::size / 2][block.y() + Block::size / 2] = block.interesting() ? 255 : 0;
+            // mGrey[block.x() + Block::size / SKIP_RATE][block.y() + Block::size / SKIP_RATE] = block.interesting() ? 255 : 0;
+            for (unsigned int i = 0; i < SKIP_RATE; ++i) {
+                for (unsigned int j = 0; j < SKIP_RATE; ++j) {
+                    mGrey[block.x() + Block::size / SKIP_RATE+j][block.y() + Block::size / SKIP_RATE+i] = block.interesting() ? 255 : 0;
+                }
+            }
         }
     }
 }

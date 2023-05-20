@@ -158,6 +158,7 @@ void IOImage::drawHit( const ShiftHit& hit ) {
     drawList.push_back( Magick::DrawableLine( x, y, x + hit.dx(), y + hit.dy() ) );
 
     std::string text = std::to_string( hit.ranking() );
+    // LOG_INFO("drawing_text: `" + text + "`");
     drawList.push_back( Magick::DrawableStrokeColor( "black" ) );
     drawList.push_back( Magick::DrawableFillColor( "lime" ) );
     drawList.push_back( Magick::DrawableRectangle( x - 5, y - 10, x + 3 + text.size() * 8, y + 10 ) );

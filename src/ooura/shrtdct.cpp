@@ -1,5 +1,6 @@
 
 #include "shrtdct.hpp"
+#include "fftsg2d.cpp"
 
 /* Cn_kR = sqrt(2.0/n) * cos(pi/2*k/n) */
 /* Cn_kI = sqrt(2.0/n) * sin(pi/2*k/n) */
@@ -471,4 +472,89 @@ void ooura::ddct<16>( int isgn, Block& a ) {
             a[j][1] = xi - x7i;
         }
     }
+}
+
+
+#define alloc_error_check(p) { \
+    if ((p) == NULL) { \
+        fprintf(stderr, "Allocation Failure!\n"); \
+        exit(1); \
+    } \
+}
+
+
+int *alloc_1d_int(int n1)
+{
+    int *i;
+    
+    // WE NEED IT 0 INITIALIZED.
+    i = (int *)calloc(n1, sizeof(int));
+    alloc_error_check(i);
+    return i;
+}
+
+
+void free_1d_int(int *i)
+{
+    free(i);
+}
+
+
+float *alloc_1d_float(int n1)
+{
+    float_t *d;
+    
+    d = (float *) malloc(sizeof(float) * n1);
+    alloc_error_check(d);
+    return d;
+}
+
+
+void free_1d_float(float *d)
+{
+    free(d);
+}
+
+#define NORMALIZE
+
+void normalize_block(Block &a, unsigned int sz) {
+    float sum = 0;
+    for (unsigned int i = 0; i < sz; ++i) {
+        for (unsigned int j = 0; j < sz; ++j) {
+            sum += a[i][j];
+        }
+    }
+    for (unsigned int i = 0; i < sz; ++i) {
+        for (unsigned int j = 0; j < sz; ++j) {
+            a[i][j] /= sum;
+        }
+    }
+}
+
+template<>
+void ooura::ddct<32>( int isgn, Block& a ) {
+    int *ip;
+    float *w;
+    ip = alloc_1d_int(8);
+    w = alloc_1d_float(48);
+    ddct2d(32, 32, isgn, a, NULL, ip, w);
+    #ifdef NORMALIZE
+    normalize_block(a, 32);
+    #endif
+    free_1d_float(w);
+    free_1d_int(ip);
+}
+
+template<>
+void ooura::ddct<64>( int isgn, Block& a ) {
+    int *ip;
+    float *w;
+    ip = alloc_1d_int(2+(int) sqrt(64+0.5));
+    w = alloc_1d_float(64*3/2);
+    ddct2d(64, 64, isgn, a, NULL, ip, w);
+    #ifdef NORMALIZE
+    normalize_block(a, 32);
+    #endif
+    free_1d_float(w);
+    free_1d_int(ip);
 }

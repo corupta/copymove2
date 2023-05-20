@@ -21,4 +21,10 @@ void ddct<8>( int isgn, Block& a );
 template<>
 void ddct<16>( int isgn, Block& a );
 
+template<>
+void ddct<32>( int isgn, Block& a );
+
+template<>
+void ddct<64>( int isgn, Block& a );
+
 }

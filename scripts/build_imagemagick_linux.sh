@@ -68,7 +68,6 @@ function doConfigure {
             --without-webp \
             --without-djvu \
             --without-windows-font-dir \
-            --without-gs-font-dir \
             --without-x \
             --without-wmf \
             --without-gvc \
@@ -87,8 +86,8 @@ function doBuild {
     make -j8 install prefix="$BUILD_DIR/debug"
 
     # release
-    (export CXXFLAGS="$CXXFLAGS -msse2 -Ofast -finline -ffast-math -funsafe-math-optimizations"; \
-    export CFLAGS="$CFLAGS -msse2 -Ofast -finline -ffast-math -funsafe-math-optimizations"; \
+    (export CXXFLAGS="$CXXFLAGS -Ofast -finline -ffast-math -funsafe-math-optimizations"; \
+    export CFLAGS="$CFLAGS -Ofast -finline -ffast-math -funsafe-math-optimizations"; \
     doConfigure)
     make -j8 install prefix="$BUILD_DIR/release"
 }
