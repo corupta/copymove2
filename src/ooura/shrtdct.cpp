@@ -1,6 +1,6 @@
 
 #include "shrtdct.hpp"
-#include "fftsg2d.cpp"
+#include "fftsg2d.hpp"
 
 /* Cn_kR = sqrt(2.0/n) * cos(pi/2*k/n) */
 /* Cn_kI = sqrt(2.0/n) * sin(pi/2*k/n) */
